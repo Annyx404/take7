@@ -29,7 +29,7 @@ jobs:
         run: |
           git config user.name "take7-bot"
           git config user.email "take7-bot@users.noreply.github.com"
-          git add guide.json scripts/missing.txt || true
+          git add guide.json scripts/missing.txt scripts/fontes.txt || true
           if git diff --staged --quiet; then
             echo "nada mudou"
           else
