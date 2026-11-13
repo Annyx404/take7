@@ -1,5 +1,3 @@
-+SBT Kids   +SBT Kids
-+SBT Novelas   +SBT Novelas
 +SBT Show do Milhão   +SBT Show do Milhão
 a-feiticeira   a-feiticeira
 A&E HD   A&E HD
@@ -16,7 +14,6 @@ AXN HD   AXN HD
 baby-shark-tv-ptv2   baby-shark-tv-ptv2
 babyfirst-ptv1   babyfirst-ptv1
 BAND HD   BAND HD
-Band SP_local   Band SP_local
 Bandnews   Bandnews
 Bandsports HD   Bandsports HD
 BBC World   BBC World
@@ -87,7 +84,6 @@ dumdum   dumdum
 DW   DW
 DW-TV   DW-TV
 E!   E!
-E! HD   E! HD
 estado-paranormal   estado-paranormal
 Eurochannel   Eurochannel
 EUROCHANNEL HD   EUROCHANNEL HD
@@ -130,7 +126,6 @@ homeful-ptv2   homeful-ptv2
 homem-que-veio-do-ceu   homem-que-veio-do-ceu
 hunter-x-hunter   hunter-x-hunter
 ID   ID
-ID HD   ID HD
 inuyasha-ptv1   inuyasha-ptv1
 jojos-bizarre-adventure-ptv1   jojos-bizarre-adventure-ptv1
 Jovem Pan News   Jovem Pan News
@@ -193,7 +188,6 @@ oggy-e-as-baratas-tontas   oggy-e-as-baratas-tontas
 one-piece-ptv2   one-piece-ptv2
 os-arquivos-do-fbi   os-arquivos-do-fbi
 os-padrinhos-magicos   os-padrinhos-magicos
-Paramount+ 1   Paramount+ 1
 paw-patrol-patrulha-canina   paw-patrol-patrulha-canina
 pegadinhas-just-for-laughs   pegadinhas-just-for-laughs
 pfl-mma-ptv1   pfl-mma-ptv1
@@ -294,7 +288,6 @@ sft-combat   sft-combat
 SIC Internacional   SIC Internacional
 SIC INTERNACIONAL   SIC INTERNACIONAL
 smithsonian-channel   smithsonian-channel
-Sony HD   Sony HD
 sony-one-shark-tank-brasil   sony-one-shark-tank-brasil
 south-park-colecao-cartman   south-park-colecao-cartman
 south-park-colecao-kenny   south-park-colecao-kenny
@@ -310,8 +303,6 @@ SPORTV 3   SPORTV 3
 SportyNet   SportyNet
 SportyNet +   SportyNet +
 SportyNet + 1   SportyNet + 1
-SportyNet + 2   SportyNet + 2
-SportyNet + 3   SportyNet + 3
 Studio Universal   Studio Universal
 STUDIO UNIVERSAL HD   STUDIO UNIVERSAL HD
 super-onze   super-onze

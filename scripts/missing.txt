@@ -21,9 +21,7 @@ Band MG
 Band PA
 Band PB
 Band PE
-Band SP
 Canal 11 (PT)
-Canal E!
 Canal Goat
 Canal Goat 2
 Canal Goat 3
@@ -46,7 +44,6 @@ Dazn 7
 Dazn 8
 Dazn 9
 Dazn 10
-Discovery ID
 Disney +
 Disney+ 2
 Disney+ 3
@@ -123,7 +120,6 @@ NHL Network
 Nickonline
 N Sports 2
 N Sports 3
-Paramount+
 PENTHOUSE (XXX)
 PlayBoy TV (XXX)
 Porto Canal (PT)
@@ -142,8 +138,6 @@ Red Bull TV
 Rede Minas
 Rede Super
 RunTime
-SBT Kids
-SBT Novelas
 SBT PI
 SBT Raiz
 Séries Classic
@@ -151,7 +145,6 @@ SescTV
 Sexprive (XXX)
 sextreme (XXX)
 Sexy Hot (XXX)
-Sony One
 Spark Tv Luz e Amor
 Sportitalia (IT)
 Sport TV +
@@ -162,8 +155,6 @@ Sport TV 4 (PT)
 Sport TV 5 (PT)
 Sport TV 6 (PT)
 SporTV 4
-SportyNet 2
-SportyNet 3
 Surf Now TV (EN)
 Tennis Channel
 Toon Goggles
