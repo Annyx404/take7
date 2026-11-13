@@ -14,7 +14,24 @@ const SOURCES = [
 const WINDOW_HOURS = 30;
 const MAX_PER_CHANNEL = 16;
 
-const TECH = new Set(["hd", "sd", "fhd", "uhd", "4k", "uhd4k", "fullhd"]);
+const TECH = new Set([
+  "hd", "sd", "fhd", "uhd", "4k", "uhd4k", "fullhd",
+  "es", "pt", "en", "it", "xxx"
+]);
+
+const STATES = {
+  ac: "acre", al: "alagoas", ap: "amapa", am: "amazonas", ba: "bahia",
+  ce: "ceara", df: "distritofederal", es2: "espiritosanto", go: "goias",
+  ma: "maranhao", mt: "matogrosso", ms: "matogrossodosul", mg: "minasgerais",
+  pa: "para", pb: "paraiba", pr: "parana", pe: "pernambuco", pi: "piaui",
+  rj: "riodejaneiro", rn: "riograndedonorte", rs: "riograndedosul",
+  ro: "rondonia", rr: "roraima", sc: "santacatarina", sp: "saopaulo",
+  se: "sergipe", to: "tocantins"
+};
+
+const STATE_BACK = Object.fromEntries(
+  Object.entries(STATES).map(([sigla, nome]) => [nome, sigla.replace(/\d$/, "")])
+);
 
 const NOISE = new Set([
   "tv", "canal", "channel", "brasil", "brazil", "br", "the", "de", "da", "do",
@@ -43,10 +60,29 @@ function key(value) {
 }
 
 function keysOf(value) {
-  const base = words(value).join("");
-  const out = [key(value)];
-  if (base && !out.includes(base)) out.push(base);
-  return out.filter(Boolean);
+  const list = words(value);
+  const out = [key(value), list.join("")];
+
+  const asName = list.map((w) => STATES[w] || w).join("");
+  const asSigla = list.map((w) => w).join("");
+  const backed = Object.entries(STATE_BACK).reduce(
+    (acc, [nome, sigla]) => acc.replace(nome, sigla),
+    asSigla
+  );
+  out.push(asName, backed);
+
+  const strong = list.filter((w) => !NOISE.has(w));
+  if (strong.length) {
+    out.push(strong.map((w) => STATES[w] || w).join(""));
+    out.push(
+      Object.entries(STATE_BACK).reduce(
+        (acc, [nome, sigla]) => acc.replace(nome, sigla),
+        strong.join("")
+      )
+    );
+  }
+
+  return [...new Set(out)].filter(Boolean);
 }
 
 async function grab(url) {
@@ -206,11 +242,40 @@ async function main() {
     matched += 1;
   }
 
-  mkdirSync("public", { recursive: true });
   writeFileSync(
     "guide.json",
     JSON.stringify({ updated: now, channels: out })
   );
+
+  const taken = new Set();
+  for (const channel of channels) {
+    if (!out[channel.id]) continue;
+    const manual = overrides[channel.id];
+    if (manual) {
+      taken.add(manual);
+      continue;
+    }
+    outer2: for (const candidate of [channel.name, channel.id]) {
+      for (const k of keysOf(candidate)) {
+        const found = byKey.get(k);
+        if (found && shows.has(found)) {
+          taken.add(found);
+          break outer2;
+        }
+      }
+    }
+  }
+
+  const livres = [];
+  for (const [id, list] of shows) {
+    if (taken.has(id)) continue;
+    if (!list.length) continue;
+    const labels = [...new Set(names.get(id) || [])];
+    livres.push(id + (labels.length ? "   " + labels.join(" / ") : ""));
+  }
+  livres.sort((a, b) => a.localeCompare(b, "pt"));
+  writeFileSync("scripts/fontes.txt", livres.join("\n") + "\n");
+  console.log("canais da fonte sem uso: " + livres.length + " (scripts/fontes.txt)");
 
   console.log("");
   console.log("canais da API .... " + channels.length);
