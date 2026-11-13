@@ -1,0 +1,38 @@
+name: Programacao
+
+on:
+  schedule:
+    - cron: "45 15,18,21,0,3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: epg
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Gerar guide.json
+        run: node scripts/build-epg.mjs
+
+      - name: Publicar
+        run: |
+          git config user.name "take7-bot"
+          git config user.email "take7-bot@users.noreply.github.com"
+          git add guide.json scripts/missing.txt || true
+          if git diff --staged --quiet; then
+            echo "nada mudou"
+          else
+            git commit -m "programacao $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
