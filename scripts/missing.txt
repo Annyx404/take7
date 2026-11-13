@@ -138,7 +138,6 @@ Record MT
 Record PB
 Record RN
 Record RO
-Record SP
 Red Bull TV
 Rede Minas
 Rede Super
