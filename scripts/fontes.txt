@@ -104,7 +104,6 @@ GE   GE
 GE TV HD   GE TV HD
 Globo News HD   Globo News HD
 Globo SP_local   Globo SP_local
-globo-internacional   globo-internacional
 GLOBONEWS   GLOBONEWS
 Globoplay Novelas   Globoplay Novelas
 Gloob HD   Gloob HD
