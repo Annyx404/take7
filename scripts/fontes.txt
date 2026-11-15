@@ -300,6 +300,7 @@ sportv 2   sportv 2
 SPORTV 2   SPORTV 2
 sportv 3   sportv 3
 SPORTV 3   SPORTV 3
+sportv-4   sportv-4
 SportyNet   SportyNet
 SportyNet +   SportyNet +
 SportyNet + 1   SportyNet + 1

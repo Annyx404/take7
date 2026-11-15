@@ -154,6 +154,7 @@ Sport TV 3 (PT)
 Sport TV 4 (PT)
 Sport TV 5 (PT)
 Sport TV 6 (PT)
+SporTV 4
 Surf Now TV (EN)
 Tennis Channel
 Toon Goggles
