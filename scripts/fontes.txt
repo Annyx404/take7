@@ -103,7 +103,6 @@ Futura HD   Futura HD
 FUTURA HD   FUTURA HD
 GE   GE
 GE TV HD   GE TV HD
-ge-tv-extra   ge-tv-extra
 Globo News HD   Globo News HD
 Globo SP_local   Globo SP_local
 globo-internacional   globo-internacional
