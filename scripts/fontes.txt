@@ -40,6 +40,7 @@ Canal do Criador   Canal do Criador
 Canal Educacao   Canal Educacao
 Canal Rural   Canal Rural
 Canal Teste 2   Canal Teste 2
+Canal UOL   Canal UOL
 CANAL UOL   CANAL UOL
 CANÇÃO NOVA HD   CANÇÃO NOVA HD
 Cartoon HD   Cartoon HD
@@ -105,6 +106,7 @@ GE TV HD   GE TV HD
 ge-tv-extra   ge-tv-extra
 Globo News HD   Globo News HD
 Globo SP_local   Globo SP_local
+globo-internacional   globo-internacional
 GLOBONEWS   GLOBONEWS
 Globoplay Novelas   Globoplay Novelas
 Gloob HD   Gloob HD
@@ -300,7 +302,6 @@ sportv 2   sportv 2
 SPORTV 2   SPORTV 2
 sportv 3   sportv 3
 SPORTV 3   SPORTV 3
-sportv-4   sportv-4
 SportyNet   SportyNet
 SportyNet +   SportyNet +
 SportyNet + 1   SportyNet + 1
