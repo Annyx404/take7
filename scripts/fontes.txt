@@ -104,7 +104,6 @@ GE   GE
 GE TV HD   GE TV HD
 Globo News HD   Globo News HD
 Globo SP_local   Globo SP_local
-globo-internacional   globo-internacional
 GLOBONEWS   GLOBONEWS
 Globoplay Novelas   Globoplay Novelas
 Gloob HD   Gloob HD
@@ -262,6 +261,12 @@ Premiere 6   Premiere 6
 Premiere 7   Premiere 7
 Premiere 9   Premiere 9
 PREMIERE CLUBES HD   PREMIERE CLUBES HD
+premiere-2   premiere-2
+premiere-3   premiere-3
+premiere-4   premiere-4
+premiere-5   premiere-5
+premiere-6   premiere-6
+premiere-7   premiere-7
 Prime Box Brazil HD   Prime Box Brazil HD
 pronto-socorro-historias-de-emergencia   pronto-socorro-historias-de-emergencia
 RAI   RAI
@@ -300,6 +305,7 @@ sportv 2   sportv 2
 SPORTV 2   SPORTV 2
 sportv 3   sportv 3
 SPORTV 3   SPORTV 3
+sportv-4-k   sportv-4-k
 SportyNet   SportyNet
 SportyNet +   SportyNet +
 SportyNet + 1   SportyNet + 1
