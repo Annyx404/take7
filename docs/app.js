@@ -340,20 +340,20 @@
 
     if (tv.apk) {
       if (cardTv) cardTv.classList.add("dl-featured");
-      tvBadge.textContent = tv.version ? `v${tv.version}` : "TV Box";
+      tvBadge.textContent = tv.version ? `v${tv.version}` : "Android TV / TV Box";
       tvBadge.className = "badge-gold";
       btnTv.className = "btn-gold btn-full";
       const sz = formatBytes(tv.size);
-      tvMeta.textContent = sz ? `TV Box e Android TV · ${sz}` : "TV Box e Android TV";
+      tvMeta.textContent = sz ? `Android TV e TV Box · ${sz}` : "Android TV e TV Box";
     } else {
       tvBadge.textContent = "Em breve";
       tvBadge.className = "badge-dim";
-      tvMeta.textContent = "TV Box e Android TV · Em preparação";
+      tvMeta.textContent = "Android TV e TV Box · Em preparação";
     }
 
     btnTv.addEventListener("click", () => {
       if (!tv.apk) {
-        showToast("A versão para TV Box chega em breve");
+        showToast("A versão para Android TV / TV Box chega em breve");
         return;
       }
       runDownloadAnimation({
@@ -362,7 +362,7 @@
         label: $("tvProgressLabel"),
         pct: $("tvProgressPct"),
         fill: $("tvProgressFill"),
-        defaultText: "Baixar para TV Box",
+        defaultText: "Baixar para Android TV / TV Box",
         onDone: () => triggerDownload(tv.apk)
       });
     });
