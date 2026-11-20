@@ -2,8 +2,8 @@
   "use strict";
 
   const CONFIG = {
-    githubUser: "Annyx404",
-    mobileRepo: "take7",
+    githubUser: "Take-7",
+    mobileRepo: "Take-7.github.io",
     tvRepo: "",
     tmdbKey: "",
     instagramUrl: "",
