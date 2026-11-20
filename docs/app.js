@@ -85,6 +85,52 @@
       if (e.key === "Escape") setMenu(false);
     });
 
+    if (window.location.hash) {
+      const targetId = window.location.hash.replace(/^#/, "");
+      try {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      } catch {}
+      if (isHome && targetId) {
+        const el = $(targetId);
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 60);
+      }
+    }
+
+    if (isHome) {
+      let pending = "";
+      try {
+        pending = sessionStorage.getItem("t7_go") || "";
+        if (pending) sessionStorage.removeItem("t7_go");
+      } catch {}
+      if (pending) {
+        const el = $(pending);
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: "smooth" }), 80);
+      }
+    }
+
+    document.querySelectorAll("[data-go]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        setMenu(false);
+        const target = $(el.dataset.go);
+        if (target) {
+          if (el.dataset.go === "inicio") {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            target.scrollIntoView({ behavior: "smooth" });
+          }
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-jump]").forEach((el) => {
+      el.addEventListener("click", () => {
+        try {
+          sessionStorage.setItem("t7_go", el.dataset.jump);
+        } catch {}
+      });
+    });
+
     links.forEach((a) => {
       a.addEventListener("click", () => setMenu(false));
     });
