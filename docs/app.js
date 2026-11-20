@@ -3,11 +3,11 @@
 
   const CONFIG = {
     githubUser: "Take-7",
-    mobileRepo: "Take-7.github.io",
-    tvRepo: "",
+    repo: "Take-7.github.io",
+    tvTag: "tv-latest",
     tmdbKey: "",
-    instagramUrl: "",
-    youtubeUrl: ""
+    instagramUrl: "https://www.instagram.com/annyx.mp3",
+    youtubeUrl: "https://youtube.com/@annyx.mp4"
   };
 
   const CACHE_KEY = "t7_catalog_v2";
@@ -158,27 +158,88 @@
     return mb >= 1 ? `${mb.toFixed(1).replace(".", ",")} MB` : `${Math.round(bytes / 1024)} KB`;
   }
 
-  async function fetchRelease(repo, tvOnly) {
-    const api = `https://api.github.com/repos/${CONFIG.githubUser}/${repo}/releases/latest`;
-    const fallbackPage = `https://github.com/${CONFIG.githubUser}/${repo}/releases/latest`;
+  function cleanVersion(release, assetName) {
+    const fromAsset = (assetName || "").match(/(\d+(?:\.\d+)+)/);
+    if (fromAsset) return fromAsset[1];
+    const fromName = (release?.name || "").match(/(\d+(?:\.\d+)+)/);
+    if (fromName) return fromName[1];
+    const tag = (release?.tag_name || "").trim();
+    if (tag && !/^tv-latest$/i.test(tag)) return tag.replace(/^v/i, "");
+    return "";
+  }
+
+  function pickApk(assets, tvOnly) {
+    const apks = (Array.isArray(assets) ? assets : [])
+      .filter((a) => typeof a?.name === "string" && a.name.toLowerCase().endsWith(".apk"))
+      .sort((a, b) => Date.parse(b.updated_at || b.created_at || 0) - Date.parse(a.updated_at || a.created_at || 0));
+    if (tvOnly) {
+      return apks.find((a) => /tv/i.test(a.name)) || apks[0] || null;
+    }
+    return apks.find((a) => !/tv/i.test(a.name)) || apks[0] || null;
+  }
+
+  function parseRelease(data, tvOnly, fallbackPage) {
+    const picked = pickApk(data?.assets, tvOnly);
+    return {
+      apk: picked ? picked.browser_download_url : "",
+      version: cleanVersion(data, picked?.name),
+      size: picked ? picked.size : 0,
+      page: data?.html_url || fallbackPage
+    };
+  }
+
+  async function fetchGithubJson(path) {
+    const api = `https://api.github.com/repos/${CONFIG.githubUser}/${CONFIG.repo}${path}`;
+    const res = await fetch(api, {
+      cache: "no-store",
+      headers: { Accept: "application/vnd.github+json" }
+    });
+    if (!res.ok) return null;
+    return res.json();
+  }
+
+  async function fetchMobileRelease() {
+    const fallbackPage = `https://github.com/${CONFIG.githubUser}/${CONFIG.repo}/releases/latest`;
     try {
-      const res = await fetch(api, { headers: { Accept: "application/vnd.github+json" } });
-      if (!res.ok) return { apk: "", version: "", size: 0, page: fallbackPage };
-      const data = await res.json();
-      const assets = Array.isArray(data.assets) ? data.assets : [];
-      const apks = assets.filter((a) => typeof a.name === "string" && a.name.toLowerCase().endsWith(".apk"));
-      let picked = null;
-      if (tvOnly) {
-        picked = apks.find((a) => /tv/i.test(a.name)) || null;
-      } else {
-        picked = apks.find((a) => !/tv/i.test(a.name)) || apks[0] || null;
+      const latest = await fetchGithubJson("/releases/latest");
+      if (latest) {
+        const parsed = parseRelease(latest, false, fallbackPage);
+        if (parsed.apk) return parsed;
       }
-      return {
-        apk: picked ? picked.browser_download_url : "",
-        version: (data.tag_name || data.name || "").replace(/^v/i, ""),
-        size: picked ? picked.size : 0,
-        page: data.html_url || fallbackPage
-      };
+      const list = await fetchGithubJson("/releases?per_page=10");
+      if (Array.isArray(list)) {
+        for (const item of list) {
+          if (item.draft || item.prerelease || item.tag_name === CONFIG.tvTag) continue;
+          const parsed = parseRelease(item, false, fallbackPage);
+          if (parsed.apk) return parsed;
+        }
+      }
+      return { apk: "", version: "", size: 0, page: fallbackPage };
+    } catch {
+      return { apk: "", version: "", size: 0, page: fallbackPage };
+    }
+  }
+
+  async function fetchTvRelease() {
+    const fallbackPage = `https://github.com/${CONFIG.githubUser}/${CONFIG.repo}/releases/tag/${CONFIG.tvTag}`;
+    try {
+      const tagged = await fetchGithubJson(`/releases/tags/${encodeURIComponent(CONFIG.tvTag)}`);
+      if (tagged) {
+        const parsed = parseRelease(tagged, true, fallbackPage);
+        if (parsed.apk) return parsed;
+      }
+      const list = await fetchGithubJson("/releases?per_page=10");
+      if (Array.isArray(list)) {
+        for (const item of list) {
+          if (item.draft) continue;
+          const assets = Array.isArray(item.assets) ? item.assets : [];
+          const hasTv = item.tag_name === CONFIG.tvTag || assets.some((a) => typeof a?.name === "string" && /tv/i.test(a.name) && a.name.toLowerCase().endsWith(".apk"));
+          if (!hasTv) continue;
+          const parsed = parseRelease(item, true, fallbackPage);
+          if (parsed.apk) return parsed;
+        }
+      }
+      return { apk: "", version: "", size: 0, page: fallbackPage };
     } catch {
       return { apk: "", version: "", size: 0, page: fallbackPage };
     }
@@ -242,18 +303,21 @@
     const btnTv = $("btnDownloadTv");
     if (!btnMobile || !btnTv) return;
 
+    const cardTv = $("cardTv");
     const mobileBadge = $("mobileVersionBadge");
     const mobileMeta = $("mobileMeta");
     const tvBadge = $("tvVersionBadge");
     const tvMeta = $("tvMeta");
 
-    const mobile = await fetchRelease(CONFIG.mobileRepo, false);
-    const mobileFallback = `https://github.com/${CONFIG.githubUser}/${CONFIG.mobileRepo}/releases/latest`;
+    const [mobile, tv] = await Promise.all([fetchMobileRelease(), fetchTvRelease()]);
+    const mobileFallback = `https://github.com/${CONFIG.githubUser}/${CONFIG.repo}/releases/latest`;
 
     if (mobile.version) {
       mobileBadge.textContent = `v${mobile.version}`;
       const sz = formatBytes(mobile.size);
       mobileMeta.textContent = sz ? `Android 7.0+ · ${sz}` : "Android 7.0 ou superior";
+    } else {
+      mobileMeta.textContent = "Android 7.0 ou superior";
     }
 
     btnMobile.addEventListener("click", () => {
@@ -274,18 +338,17 @@
       });
     });
 
-    let tv = { apk: "", version: "", size: 0, page: "" };
-    if (CONFIG.tvRepo) {
-      tv = await fetchRelease(CONFIG.tvRepo, false);
-    } else {
-      tv = await fetchRelease(CONFIG.mobileRepo, true);
-    }
-
     if (tv.apk) {
+      if (cardTv) cardTv.classList.add("dl-featured");
       tvBadge.textContent = tv.version ? `v${tv.version}` : "TV Box";
       tvBadge.className = "badge-gold";
+      btnTv.className = "btn-gold btn-full";
       const sz = formatBytes(tv.size);
       tvMeta.textContent = sz ? `TV Box e Android TV · ${sz}` : "TV Box e Android TV";
+    } else {
+      tvBadge.textContent = "Em breve";
+      tvBadge.className = "badge-dim";
+      tvMeta.textContent = "TV Box e Android TV · Em preparação";
     }
 
     btnTv.addEventListener("click", () => {
@@ -306,8 +369,6 @@
   }
 
   function setupSocial() {
-    const ig = $("btnInstagram");
-    const yt = $("btnYoutube");
     const openOrSoon = (url, soonMsg) => {
       if (url && /^https?:\/\//i.test(url)) {
         window.open(url, "_blank", "noopener,noreferrer");
@@ -315,8 +376,12 @@
         showToast(soonMsg);
       }
     };
-    if (ig) ig.addEventListener("click", () => openOrSoon(CONFIG.instagramUrl, "O Instagram chega em breve"));
-    if (yt) yt.addEventListener("click", () => openOrSoon(CONFIG.youtubeUrl, "O canal chega em breve"));
+    document.querySelectorAll("[data-social='instagram']").forEach((el) => {
+      el.addEventListener("click", () => openOrSoon(CONFIG.instagramUrl, "O Instagram chega em breve"));
+    });
+    document.querySelectorAll("[data-social='youtube']").forEach((el) => {
+      el.addEventListener("click", () => openOrSoon(CONFIG.youtubeUrl, "O canal chega em breve"));
+    });
   }
 
   function renderRailSkeleton() {

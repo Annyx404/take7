@@ -140,10 +140,10 @@
           <span class="sec-bar"></span>
           <h2>Download</h2>
         </div>
-        <p class="sec-desc">Escolha a edição feita para o seu aparelho e comece a assistir em poucos segundos.</p>
+        <p class="sec-desc">Escolha a edição feita para o seu aparelho. Os botões abaixo puxam sempre a versão mais recente publicada.</p>
 
         <div class="dl-grid">
-          <article class="dl-card dl-featured">
+          <article class="dl-card dl-featured" id="cardMobile">
             <div class="dl-top">
               <div class="dl-ico">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -155,7 +155,7 @@
             <h3>Take 7 Mobile</h3>
             <p>Leve o catálogo inteiro no bolso. Reprodução instantânea, som potente, perfis com bloqueio por PIN e atualizações sem complicação.</p>
             <div class="dl-meta">
-              <span id="mobileMeta">Android 7.0 ou superior</span>
+              <span id="mobileMeta">Verificando versão mais recente...</span>
             </div>
             <div class="dl-progress" id="mobileProgress" aria-hidden="true">
               <div class="dl-progress-head">
@@ -174,19 +174,19 @@
             </button>
           </article>
 
-          <article class="dl-card">
+          <article class="dl-card" id="cardTv">
             <div class="dl-top">
               <div class="dl-ico">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>
                 </svg>
               </div>
-              <span class="badge-dim" id="tvVersionBadge">Em breve</span>
+              <span class="badge-dim" id="tvVersionBadge">Edição TV</span>
             </div>
             <h3>Take 7 TV</h3>
-            <p>Experiência de cinema direto na sala. Visual desenhado para telas grandes, resposta imediata e conforto de sobra para maratonar no sofá.</p>
+            <p>Experiência de cinema direto na sala. Visual desenhado para telas grandes, navegação pelo controle remoto e conforto de sobra para maratonar no sofá.</p>
             <div class="dl-meta">
-              <span id="tvMeta">TV Box e Android TV · Em preparação</span>
+              <span id="tvMeta">Verificando versão mais recente...</span>
             </div>
             <div class="dl-progress" id="tvProgress" aria-hidden="true">
               <div class="dl-progress-head">
@@ -211,6 +211,36 @@
             <circle cx="12" cy="12" r="9"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
           </svg>
           <span>Na primeira instalação, habilite <strong>Instalar apps desconhecidos</strong> nas configurações do aparelho para concluir em segundos.</span>
+        </div>
+
+        <div class="support-card">
+          <div class="support-head">
+            <span class="badge-gold">Apoie o projeto</span>
+            <h3>Curtiu o Take 7?</h3>
+          </div>
+          <div class="support-actions">
+            <button type="button" class="social-pill" data-social="youtube">
+              <img src="assets/social_youtube.png" alt="YouTube" class="social-icon social-yt" draggable="false">
+              <span class="social-pill-copy">
+                <strong>Se inscreva no meu canal</strong>
+                <span>@annyx.mp4</span>
+              </span>
+              <svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 6l6 6-6 6"/>
+              </svg>
+            </button>
+            <button type="button" class="social-pill" data-social="instagram">
+              <img src="assets/social_instagram.png" alt="Instagram" class="social-icon" draggable="false">
+              <span class="social-pill-copy">
+                <strong>Siga-me no Insta</strong>
+                <span>@annyx.mp3</span>
+              </span>
+              <svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 6l6 6-6 6"/>
+              </svg>
+            </button>
+          </div>
+          <p class="support-note">Sem doações, sem assinatura e sem precisar pagar nem um cafezinho — se inscrever no canal e seguir no Insta não custa nada e já é o maior apoio que você pode dar por todo esse trabalho.</p>
         </div>
       </div>
     </section>
