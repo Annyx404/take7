@@ -102,8 +102,10 @@ Futura HD   Futura HD
 FUTURA HD   FUTURA HD
 GE   GE
 GE TV HD   GE TV HD
+ge-tv-extra   ge-tv-extra
 Globo News HD   Globo News HD
 Globo SP_local   Globo SP_local
+globo-internacional   globo-internacional
 GLOBONEWS   GLOBONEWS
 Globoplay Novelas   Globoplay Novelas
 Gloob HD   Gloob HD
@@ -263,10 +265,6 @@ Premiere 9   Premiere 9
 PREMIERE CLUBES HD   PREMIERE CLUBES HD
 premiere-2   premiere-2
 premiere-3   premiere-3
-premiere-4   premiere-4
-premiere-5   premiere-5
-premiere-6   premiere-6
-premiere-7   premiere-7
 Prime Box Brazil HD   Prime Box Brazil HD
 pronto-socorro-historias-de-emergencia   pronto-socorro-historias-de-emergencia
 RAI   RAI
