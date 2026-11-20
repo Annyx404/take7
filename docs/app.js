@@ -10,6 +10,7 @@
     youtubeUrl: ""
   };
 
+  const CACHE_KEY = "t7_catalog_v2";
   const $ = (id) => document.getElementById(id);
 
   let toastTimer = 0;
@@ -63,10 +64,12 @@
     const drawer = $("drawer");
     const veil = $("drawerVeil");
     const closeBtn = $("drawerClose");
+    const isHome = document.body.dataset.page === "home";
     const links = Array.from(document.querySelectorAll("[data-sec]"));
-    const sections = ["inicio", "download", "sobre"].map((id) => $(id)).filter(Boolean);
+    const sections = ["inicio", "download"].map((id) => $(id)).filter(Boolean);
 
     const setMenu = (open) => {
+      if (!burger || !drawer || !veil) return;
       burger.classList.toggle("open", open);
       drawer.classList.toggle("open", open);
       veil.classList.toggle("open", open);
@@ -75,9 +78,9 @@
       document.body.style.overflow = open ? "hidden" : "";
     };
 
-    burger.addEventListener("click", () => setMenu(!drawer.classList.contains("open")));
-    closeBtn.addEventListener("click", () => setMenu(false));
-    veil.addEventListener("click", () => setMenu(false));
+    if (burger) burger.addEventListener("click", () => setMenu(!drawer.classList.contains("open")));
+    if (closeBtn) closeBtn.addEventListener("click", () => setMenu(false));
+    if (veil) veil.addEventListener("click", () => setMenu(false));
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") setMenu(false);
     });
@@ -86,20 +89,21 @@
       a.addEventListener("click", () => setMenu(false));
     });
 
-    const onScroll = () => {
-      topbar.classList.toggle("scrolled", window.scrollY > 24);
-      const y = window.scrollY + 140;
-      let active = "inicio";
-      sections.forEach((sec) => {
-        if (sec.offsetTop <= y) active = sec.id;
-      });
-      links.forEach((el) => {
-        el.classList.toggle("active", el.dataset.sec === active);
-      });
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
+    if (isHome && topbar) {
+      const onScroll = () => {
+        topbar.classList.toggle("scrolled", window.scrollY > 24);
+        const y = window.scrollY + 180;
+        let active = "inicio";
+        sections.forEach((sec) => {
+          if (sec.offsetTop <= y) active = sec.id;
+        });
+        links.forEach((el) => {
+          el.classList.toggle("active", el.dataset.sec === active);
+        });
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    }
   }
 
   function formatBytes(bytes) {
@@ -144,36 +148,84 @@
     a.remove();
   }
 
+  function runDownloadAnimation(opts) {
+    const { btn, wrap, label, pct, fill, defaultText, onDone } = opts;
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    const span = btn.querySelector("span");
+    if (span) span.textContent = "Preparando...";
+    wrap.classList.add("active");
+    wrap.setAttribute("aria-hidden", "false");
+    fill.style.width = "0%";
+    pct.textContent = "0%";
+    label.textContent = "Conectando ao servidor...";
+
+    const steps = [
+      { t: 140, p: 24, msg: "Verificando arquivo..." },
+      { t: 420, p: 58, msg: "Preparando pacote..." },
+      { t: 740, p: 86, msg: "Quase pronto..." },
+      { t: 1020, p: 100, msg: "Download iniciado" }
+    ];
+
+    steps.forEach((s) => {
+      setTimeout(() => {
+        fill.style.width = `${s.p}%`;
+        pct.textContent = `${s.p}%`;
+        label.textContent = s.msg;
+        if (s.p === 100) {
+          if (span) span.textContent = "Download iniciado";
+          onDone();
+        }
+      }, s.t);
+    });
+
+    setTimeout(() => {
+      btn.disabled = false;
+      if (span) span.textContent = defaultText;
+      wrap.classList.remove("active");
+      wrap.setAttribute("aria-hidden", "true");
+      setTimeout(() => {
+        fill.style.width = "0%";
+        pct.textContent = "0%";
+      }, 280);
+    }, 3200);
+  }
+
   async function setupDownloads() {
     const btnMobile = $("btnDownloadMobile");
     const btnTv = $("btnDownloadTv");
+    if (!btnMobile || !btnTv) return;
+
     const mobileBadge = $("mobileVersionBadge");
     const mobileMeta = $("mobileMeta");
     const tvBadge = $("tvVersionBadge");
     const tvMeta = $("tvMeta");
-    const aboutVersion = $("aboutVersion");
-    const drawerVersion = $("drawerVersion");
 
     const mobile = await fetchRelease(CONFIG.mobileRepo, false);
     const mobileFallback = `https://github.com/${CONFIG.githubUser}/${CONFIG.mobileRepo}/releases/latest`;
 
     if (mobile.version) {
       mobileBadge.textContent = `v${mobile.version}`;
-      aboutVersion.textContent = `versão ${mobile.version}`;
-      drawerVersion.textContent = `v${mobile.version}`;
       const sz = formatBytes(mobile.size);
-      mobileMeta.textContent = sz ? `APK oficial · ${sz} · GitHub Releases` : "APK oficial · GitHub Releases";
-    } else {
-      mobileMeta.textContent = "APK oficial · GitHub Releases";
+      mobileMeta.textContent = sz ? `Android 7.0+ · ${sz}` : "Android 7.0 ou superior";
     }
 
     btnMobile.addEventListener("click", () => {
-      if (mobile.apk) {
-        showToast("Iniciando download do Take 7 Mobile...");
-        triggerDownload(mobile.apk);
-      } else {
-        window.open(mobile.page || mobileFallback, "_blank", "noopener,noreferrer");
-      }
+      runDownloadAnimation({
+        btn: btnMobile,
+        wrap: $("mobileProgress"),
+        label: $("mobileProgressLabel"),
+        pct: $("mobileProgressPct"),
+        fill: $("mobileProgressFill"),
+        defaultText: "Baixar para Celular",
+        onDone: () => {
+          if (mobile.apk) {
+            triggerDownload(mobile.apk);
+          } else {
+            window.open(mobile.page || mobileFallback, "_blank", "noopener,noreferrer");
+          }
+        }
+      });
     });
 
     let tv = { apk: "", version: "", size: 0, page: "" };
@@ -184,25 +236,32 @@
     }
 
     if (tv.apk) {
-      if (tv.version) tvBadge.textContent = `v${tv.version}`;
+      tvBadge.textContent = tv.version ? `v${tv.version}` : "TV Box";
+      tvBadge.className = "badge-gold";
       const sz = formatBytes(tv.size);
-      tvMeta.textContent = sz ? `APK TV Box · ${sz} · GitHub Releases` : "APK TV Box · GitHub Releases";
-    } else {
-      tvBadge.textContent = "Em breve";
-      tvMeta.textContent = "Versão para TV Box em preparação";
+      tvMeta.textContent = sz ? `TV Box e Android TV · ${sz}` : "TV Box e Android TV";
     }
 
     btnTv.addEventListener("click", () => {
-      if (tv.apk) {
-        showToast("Iniciando download do Take 7 TV...");
-        triggerDownload(tv.apk);
-      } else {
+      if (!tv.apk) {
         showToast("A versão para TV Box chega em breve");
+        return;
       }
+      runDownloadAnimation({
+        btn: btnTv,
+        wrap: $("tvProgress"),
+        label: $("tvProgressLabel"),
+        pct: $("tvProgressPct"),
+        fill: $("tvProgressFill"),
+        defaultText: "Baixar para TV Box",
+        onDone: () => triggerDownload(tv.apk)
+      });
     });
   }
 
   function setupSocial() {
+    const ig = $("btnInstagram");
+    const yt = $("btnYoutube");
     const openOrSoon = (url, soonMsg) => {
       if (url && /^https?:\/\//i.test(url)) {
         window.open(url, "_blank", "noopener,noreferrer");
@@ -210,8 +269,135 @@
         showToast(soonMsg);
       }
     };
-    $("btnInstagram").addEventListener("click", () => openOrSoon(CONFIG.instagramUrl, "O Instagram chega em breve"));
-    $("btnYoutube").addEventListener("click", () => openOrSoon(CONFIG.youtubeUrl, "O canal chega em breve"));
+    if (ig) ig.addEventListener("click", () => openOrSoon(CONFIG.instagramUrl, "O Instagram chega em breve"));
+    if (yt) yt.addEventListener("click", () => openOrSoon(CONFIG.youtubeUrl, "O canal chega em breve"));
+  }
+
+  function renderRailSkeleton() {
+    const rail = $("posterRail");
+    if (!rail || rail.children.length > 0) return;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 10; i++) {
+      const card = document.createElement("div");
+      card.className = "rail-card";
+      const thumb = document.createElement("div");
+      thumb.className = "rail-thumb";
+      const name = document.createElement("div");
+      name.className = "rail-skel-name";
+      card.appendChild(thumb);
+      card.appendChild(name);
+      frag.appendChild(card);
+    }
+    rail.appendChild(frag);
+  }
+
+  function renderPosterWall(items) {
+    const wall = $("posterWall");
+    if (!wall) return;
+    wall.innerHTML = "";
+    const cols = window.innerWidth < 760 ? 5 : 10;
+    const perCol = 5;
+    const durations = [52, 64, 56, 68, 58, 66, 54, 70, 60, 62];
+    const frag = document.createDocumentFragment();
+
+    for (let c = 0; c < cols; c++) {
+      const col = document.createElement("div");
+      col.className = `wall-col ${c % 2 === 0 ? "up" : "down"}`;
+      col.style.setProperty("--dur", `${durations[c % durations.length]}s`);
+
+      const cards = [];
+      for (let k = 0; k < perCol; k++) {
+        const idx = (c * perCol + k) % Math.max(items.length, 1);
+        const item = items[idx];
+        cards.push(item ? item.img : "");
+      }
+
+      [...cards, ...cards].forEach((src, pos) => {
+        const box = document.createElement("div");
+        box.className = "wall-card";
+        if (src) {
+          const img = document.createElement("img");
+          img.src = src;
+          img.alt = "";
+          img.loading = pos < perCol ? "eager" : "lazy";
+          img.decoding = "async";
+          img.referrerPolicy = "no-referrer";
+          const done = () => {
+            img.classList.add("ready");
+            box.classList.add("loaded");
+          };
+          img.addEventListener("load", done, { once: true });
+          if (img.complete && img.naturalWidth > 0) done();
+          box.appendChild(img);
+        }
+        col.appendChild(box);
+      });
+
+      frag.appendChild(col);
+    }
+    wall.appendChild(frag);
+  }
+
+  function renderPosterRail(items) {
+    const rail = $("posterRail");
+    if (!rail || items.length === 0) return;
+    rail.innerHTML = "";
+    const frag = document.createDocumentFragment();
+
+    items.slice(0, 14).forEach((item, idx) => {
+      const card = document.createElement("div");
+      card.className = "rail-card";
+
+      const thumb = document.createElement("div");
+      thumb.className = "rail-thumb";
+
+      const img = document.createElement("img");
+      img.src = item.img;
+      img.alt = item.title;
+      img.loading = idx < 8 ? "eager" : "lazy";
+      img.decoding = "async";
+      img.referrerPolicy = "no-referrer";
+      const done = () => {
+        img.classList.add("ready");
+        thumb.classList.add("loaded");
+      };
+      img.addEventListener("load", done, { once: true });
+      if (img.complete && img.naturalWidth > 0) done();
+
+      const chip = document.createElement("span");
+      chip.className = "rail-chip";
+      chip.textContent = item.kind;
+
+      thumb.appendChild(img);
+      thumb.appendChild(chip);
+
+      const name = document.createElement("span");
+      name.className = "rail-name";
+      name.textContent = item.title;
+
+      card.appendChild(thumb);
+      card.appendChild(name);
+      frag.appendChild(card);
+    });
+
+    rail.appendChild(frag);
+  }
+
+  function readCachedCatalog() {
+    try {
+      const raw = sessionStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) && parsed.length >= 8 ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function writeCachedCatalog(items) {
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify(items));
+    } catch {}
   }
 
   async function fetchTmdbItems() {
@@ -234,145 +420,102 @@
     }
   }
 
-  async function fetchPublicCatalog() {
-    const [showsRes, moviesRes, animeRes] = await Promise.allSettled([
-      fetch("https://api.tvmaze.com/shows?page=0").then((r) => (r.ok ? r.json() : [])),
-      fetch("https://itunes.apple.com/search?term=avengers+batman+dune+interstellar&media=movie&entity=movie&limit=20&country=br").then((r) => (r.ok ? r.json() : { results: [] })),
-      fetch("https://api.jikan.moe/v4/top/anime?limit=12").then((r) => (r.ok ? r.json() : { data: [] }))
-    ]);
-
-    const shows = showsRes.status === "fulfilled" && Array.isArray(showsRes.value)
-      ? showsRes.value
-          .filter((s) => s && s.image && s.image.medium && (s.rating?.average || 0) >= 7.8)
-          .sort((a, b) => (b.weight || 0) - (a.weight || 0))
-          .slice(0, 14)
-          .map((s) => ({
-            title: s.name || "",
-            kind: "Série",
-            img: s.image.medium.replace(/^http:/, "https:")
-          }))
-      : [];
-
-    const movies = moviesRes.status === "fulfilled" && Array.isArray(moviesRes.value?.results)
-      ? moviesRes.value.results
-          .filter((m) => m && m.artworkUrl100)
-          .slice(0, 12)
-          .map((m) => ({
-            title: m.trackName || "",
-            kind: "Filme",
-            img: m.artworkUrl100.replace(/100x100bb/g, "400x600bb").replace(/^http:/, "https:")
-          }))
-      : [];
-
-    const animes = animeRes.status === "fulfilled" && Array.isArray(animeRes.value?.data)
-      ? animeRes.value.data
-          .filter((a) => a && a.images?.jpg?.large_image_url)
-          .slice(0, 10)
-          .map((a) => ({
-            title: a.title || "",
-            kind: "Anime",
-            img: a.images.jpg.large_image_url
-          }))
-      : [];
-
-    const pools = [movies, shows, animes].filter((p) => p.length > 0);
-    const mixed = [];
-    let i = 0;
-    while (mixed.length < 30 && pools.some((p) => i < p.length)) {
-      pools.forEach((p) => {
-        if (i < p.length && mixed.length < 30) mixed.push(p[i]);
-      });
-      i++;
-    }
-    return mixed;
+  function fetchShows() {
+    return fetch("https://api.tvmaze.com/shows?page=0")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) =>
+        Array.isArray(list)
+          ? list
+              .filter((s) => s && s.image && s.image.medium && (s.rating?.average || 0) >= 8.0)
+              .sort((a, b) => (b.weight || 0) - (a.weight || 0))
+              .slice(0, 16)
+              .map((s) => ({
+                title: s.name || "",
+                kind: "Série",
+                img: s.image.medium.replace(/^http:/, "https:")
+              }))
+          : []
+      )
+      .catch(() => []);
   }
 
-  function renderPosterWall(items) {
-    const wall = $("posterWall");
-    if (!wall) return;
-    wall.innerHTML = "";
-    const cols = window.innerWidth < 760 ? 5 : 10;
-    const perCol = 6;
-    const durations = [54, 66, 58, 72, 60, 68, 56, 70, 62, 64];
-
-    for (let c = 0; c < cols; c++) {
-      const col = document.createElement("div");
-      col.className = `wall-col ${c % 2 === 0 ? "up" : "down"}`;
-      col.style.setProperty("--dur", `${durations[c % durations.length]}s`);
-
-      const cards = [];
-      for (let k = 0; k < perCol; k++) {
-        const idx = (c * perCol + k) % Math.max(items.length, 1);
-        const item = items[idx];
-        cards.push(item ? item.img : "");
-      }
-
-      [...cards, ...cards].forEach((src) => {
-        const box = document.createElement("div");
-        box.className = "wall-card";
-        if (src) {
-          const img = document.createElement("img");
-          img.src = src;
-          img.alt = "";
-          img.loading = "lazy";
-          img.decoding = "async";
-          img.referrerPolicy = "no-referrer";
-          img.addEventListener("load", () => img.classList.add("ready"));
-          box.appendChild(img);
-        }
-        col.appendChild(box);
-      });
-
-      wall.appendChild(col);
-    }
+  function fetchMovies() {
+    return fetch("https://itunes.apple.com/search?term=batman+avengers+interstellar+dune&media=movie&entity=movie&limit=18&country=br")
+      .then((r) => (r.ok ? r.json() : { results: [] }))
+      .then((data) =>
+        Array.isArray(data?.results)
+          ? data.results
+              .filter((m) => m && m.artworkUrl100)
+              .slice(0, 14)
+              .map((m) => ({
+                title: m.trackName || "",
+                kind: "Filme",
+                img: m.artworkUrl100.replace(/100x100bb/g, "300x450bb").replace(/^http:/, "https:")
+              }))
+          : []
+      )
+      .catch(() => []);
   }
 
-  function renderPosterRail(items) {
-    const rail = $("posterRail");
-    if (!rail) return;
-    rail.innerHTML = "";
-    const list = items.slice(0, 14);
-    list.forEach((item) => {
-      const card = document.createElement("div");
-      card.className = "rail-card";
-
-      const thumb = document.createElement("div");
-      thumb.className = "rail-thumb";
-
-      const img = document.createElement("img");
-      img.src = item.img;
-      img.alt = item.title;
-      img.loading = "lazy";
-      img.decoding = "async";
-      img.referrerPolicy = "no-referrer";
-      img.addEventListener("load", () => img.classList.add("ready"));
-
-      const chip = document.createElement("span");
-      chip.className = "rail-chip";
-      chip.textContent = item.kind;
-
-      thumb.appendChild(img);
-      thumb.appendChild(chip);
-
-      const name = document.createElement("span");
-      name.className = "rail-name";
-      name.textContent = item.title;
-
-      card.appendChild(thumb);
-      card.appendChild(name);
-      rail.appendChild(card);
-    });
+  function interleave(a, b) {
+    const out = [];
+    const max = Math.max(a.length, b.length);
+    for (let i = 0; i < max && out.length < 28; i++) {
+      if (i < a.length) out.push(a[i]);
+      if (i < b.length && out.length < 28) out.push(b[i]);
+    }
+    return out;
   }
 
   async function setupCatalog() {
-    renderPosterWall([]);
-    let items = await fetchTmdbItems();
-    if (items.length < 8) {
-      items = await fetchPublicCatalog();
+    if (!$("posterWall")) return;
+
+    const cached = readCachedCatalog();
+    if (cached) {
+      renderPosterWall(cached);
+      renderPosterRail(cached);
+      return;
     }
-    if (items.length > 0) {
-      renderPosterWall(items);
-      renderPosterRail(items);
+
+    renderPosterWall([]);
+    renderRailSkeleton();
+
+    const tmdb = await fetchTmdbItems();
+    if (tmdb.length >= 8) {
+      writeCachedCatalog(tmdb);
+      renderPosterWall(tmdb);
+      renderPosterRail(tmdb);
+      return;
+    }
+
+    let renderedFirst = false;
+    let shows = [];
+    let movies = [];
+
+    const showsPromise = fetchShows().then((res) => {
+      shows = res;
+      if (!renderedFirst && shows.length >= 6) {
+        renderedFirst = true;
+        renderPosterWall(shows);
+        renderPosterRail(shows);
+      }
+    });
+
+    const moviesPromise = fetchMovies().then((res) => {
+      movies = res;
+      if (!renderedFirst && movies.length >= 6) {
+        renderedFirst = true;
+        renderPosterWall(movies);
+        renderPosterRail(movies);
+      }
+    });
+
+    await Promise.allSettled([showsPromise, moviesPromise]);
+    const combined = interleave(movies, shows);
+    if (combined.length > 0) {
+      writeCachedCatalog(combined);
+      renderPosterWall(combined);
+      renderPosterRail(combined);
     }
   }
 
